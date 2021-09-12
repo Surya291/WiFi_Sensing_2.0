@@ -14,7 +14,7 @@ Detect malpractices conducted during the online examination using wifi sensing.
 
 ### Steps to test your ESP32 module's wifi connectivity
 1. Connect your ESP32-C210x module with your system with microUSB cable.
-2. Download for [ESP32 drivers](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) if not installed automatically.
+2. Download [ESP32 drivers](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers) if not installed automatically.
 3. Install [PYTHON2.7](https://www.python.org/download/releases/2.7/)
 4. Install arduino IDE from microsoft store or [ARDUiNO IDE](https://www.arduino.cc/en/software)
 5. Now we have to install the package for ESP32. We use board manager for doing that. Go to ** Arduino IDE > Preferences > Addtional Board manager URL ** and paste this *https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json* . We can do it in different ways, go to [https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html#](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html#) for more information.
