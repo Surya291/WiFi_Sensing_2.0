@@ -14,7 +14,7 @@ import plotly.express as px
 
 # %%
 df = pd.read_csv(
-    '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/CSI_DATA/movement/test2.csv')
+    '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/CSI_DATA/d1.csv')
 print(df.columns)
 
 # %%
