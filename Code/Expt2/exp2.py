@@ -14,18 +14,18 @@ import plotly.express as px
 
 # %%
 df = pd.read_csv(
-    '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/CSI_DATA/d1.csv')
+    '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/CSI_DATA/room2/not_blocked.csv')
 print(df.columns)
 
 # %%
 df_rssi = df.loc[:, ['rssi']]
 df_time = df.loc[:, ['real_timestamp']]
-print(df_rssi)
-print(df_time)
+#print(df_rssi)
+#print(df_time)
 df_rssi.plot(y=['rssi'])
-#plt.axis([0, len(df_rssi.index), -72, -45])
+plt.axis([0, len(df_rssi.index), -72, -45])
 #plt.plot(df_time['real_timestamp'], df_rssi['rssi'])
-plt.ylabel('rssi magnitude test 2')
+plt.ylabel('rssi magnitude')
 
 # %%
 df_csi = df.loc[:, ['len', 'CSI_DATA']]
@@ -51,11 +51,12 @@ for x, csi in enumerate(df_csi.iloc):
 # %%
 array_csi_modulus = abs(array_csi)  # amplitude calculating
 print(array_csi_modulus.shape)
+array_csi_phase = np.angle(array_csi)
 
 drop_idx = []
 
 for i in range(array_csi_modulus.shape[1]):
-  if (np.var(array_csi_modulus[:, i]) < 1):
+  if (np.var(array_csi_modulus[:, i]) < 1e-2):
     drop_idx.append(i)
 
 
@@ -82,12 +83,21 @@ for i in select_list:
 # %%
 columns = [f'sub{i}' for i in range(0, size_y)]
 df_csi_modulus = pd.DataFrame(array_csi_modulus, columns=columns)
-fig = px.line(df_csi_modulus, y=[f'sub{i}' for i in LLTF], title='test2 CSI LLTF')
+df_csi_phase = pd.DataFrame(array_csi_phase, columns=columns)
+
+# %%
+fig = px.line(df_csi_modulus, y=[f'sub{i}' for i in LLTF], title='room2 not blocked CSI magnitude LLTF')
 fig.show()
 
 #%%
 fig = px.line(df_csi_modulus, y=[
-              f'sub{i}' for i in HTLTF], title='test2 CSI HTLTF')
+              f'sub{i}' for i in HTLTF], title='room2 LOS CSI magnitude HTLTF')
 fig.show()
+
+# %%
+fig = px.line(df_csi_phase, y=[
+              f'sub{i}' for i in LLTF], title='room2 not blocked CSI phase LLTF')
+fig.show()
+
 
 # %%

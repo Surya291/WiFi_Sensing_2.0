@@ -23,3 +23,8 @@ Detect malpractices conducted during the online examination using wifi sensing.
 8. Try uploading [blinking led](examples/led_light.h) or [connect wifi and fetch time](examples/wifiBasic.h).
 
 
+### Steps to collect data from windows command prompt
+1. Run **export.sh** from the shell you want to use.
+2. Build the project using **idf.py build**
+3. Run **idf.py -p PORT monitor** to see data in the command prompt.
+4. Run **idf.py -p PORT monitor | findstr "CSI_DATA" > "datafilename.csv"** to save the data in csv file.
