@@ -27,4 +27,4 @@ Detect malpractices conducted during the online examination using wifi sensing.
 1. Run **export.sh** from the shell you want to use.
 2. Build the project using **idf.py build**
 3. Run **idf.py -p PORT monitor** to see data in the command prompt.
-4. Run **idf.py -p PORT monitor | findstr "CSI_DATA" > "datafilename.csv"** to save the data in csv file.
+4. Run '''idf.py -p PORT monitor | findstr "CSI_DATA" > "datafilename.csv"''' to save the data in csv file.
