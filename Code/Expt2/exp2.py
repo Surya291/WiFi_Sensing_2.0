@@ -14,7 +14,7 @@ import plotly.express as px
 
 # %%
 df = pd.read_csv(
-    '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/CSI_DATA/room2/not_blocked.csv')
+    '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/room2/t5.csv')
 print(df.columns)
 
 # %%
@@ -43,8 +43,18 @@ array_csi = np.zeros([size_x, size_y], dtype=np.complex64)
 for x, csi in enumerate(df_csi.iloc):
     temp = csi["CSI_DATA"].replace(' ', ',')
     temp = temp.replace(',]', ']')
+    #print(temp)
+    ll = 0
+    if temp[-1] != ']':
+      temp = temp + ']'
+      ll = -1
+    temp = temp.replace(',]', ']')
+    temp = temp.replace('-]', ']')
+    print((temp))
+    temp = temp.replace(',]', ']')
     csi_raw_data = json.loads(temp)
-    for y in range(0, len(csi_raw_data), 2):
+    ll += len(csi_raw_data)
+    for y in range(0, ll, 2):
         # IQ channel frequency response
         array_csi[x][y//2] = complex(csi_raw_data[y], csi_raw_data[y + 1])
 
@@ -56,7 +66,7 @@ array_csi_phase = np.angle(array_csi)
 drop_idx = []
 
 for i in range(array_csi_modulus.shape[1]):
-  if (np.var(array_csi_modulus[:, i]) < 1e-2):
+  if (np.var(array_csi_modulus[:, i]) < 1):
     drop_idx.append(i)
 
 
@@ -86,18 +96,23 @@ df_csi_modulus = pd.DataFrame(array_csi_modulus, columns=columns)
 df_csi_phase = pd.DataFrame(array_csi_phase, columns=columns)
 
 # %%
-fig = px.line(df_csi_modulus, y=[f'sub{i}' for i in LLTF], title='room2 not blocked CSI magnitude LLTF')
+fig = px.line(df_csi_modulus, y=[f'sub{i}' for i in LLTF], title='t5 CSI magnitude LLTF')
 fig.show()
 
 #%%
 fig = px.line(df_csi_modulus, y=[
-              f'sub{i}' for i in HTLTF], title='room2 LOS CSI magnitude HTLTF')
+              f'sub{i}' for i in HTLTF], title='t5 CSI magnitude HTLTF')
 fig.show()
 
 # %%
 fig = px.line(df_csi_phase, y=[
-              f'sub{i}' for i in LLTF], title='room2 not blocked CSI phase LLTF')
+              f'sub{i}' for i in LLTF], title='t5 CSI phase LLTF')
 fig.show()
 
+
+# %%
+fig = px.line(df_csi_phase, y=[
+              f'sub{i}' for i in LLTF], title='t5 CSI phase HTLTF')
+fig.show()
 
 # %%
