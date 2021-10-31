@@ -14,7 +14,7 @@ import plotly.express as px
 
 # %%
 df = pd.read_csv(
-    '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/room2/t5.csv')
+    '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/room2/v2/t16.csv')
 print(df.columns)
 
 # %%
@@ -50,7 +50,7 @@ for x, csi in enumerate(df_csi.iloc):
       ll = -1
     temp = temp.replace(',]', ']')
     temp = temp.replace('-]', ']')
-    print((temp))
+    #print((temp))
     temp = temp.replace(',]', ']')
     csi_raw_data = json.loads(temp)
     ll += len(csi_raw_data)
@@ -96,23 +96,24 @@ df_csi_modulus = pd.DataFrame(array_csi_modulus, columns=columns)
 df_csi_phase = pd.DataFrame(array_csi_phase, columns=columns)
 
 # %%
-fig = px.line(df_csi_modulus, y=[f'sub{i}' for i in LLTF], title='t5 CSI magnitude LLTF')
+fig = px.line(df_csi_modulus, y=[
+              f'sub{i}' for i in LLTF], title='t16 CSI magnitude LLTF')
 fig.show()
 
 #%%
 fig = px.line(df_csi_modulus, y=[
-              f'sub{i}' for i in HTLTF], title='t5 CSI magnitude HTLTF')
+              f'sub{i}' for i in HTLTF], title='t16 CSI magnitude HTLTF')
 fig.show()
 
 # %%
 fig = px.line(df_csi_phase, y=[
-              f'sub{i}' for i in LLTF], title='t5 CSI phase LLTF')
+              f'sub{i}' for i in LLTF], title='t16 CSI phase LLTF')
 fig.show()
 
 
 # %%
 fig = px.line(df_csi_phase, y=[
-              f'sub{i}' for i in LLTF], title='t5 CSI phase HTLTF')
+              f'sub{i}' for i in LLTF], title='t16 CSI phase HTLTF')
 fig.show()
 
 # %%
