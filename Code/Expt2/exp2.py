@@ -110,7 +110,7 @@ pca = PCA(n_components=5)
 for i, xx in enumerate(chunked_data):
   pcs = pca.fit_transform(xx)
   plt.title(f'PCs {i+1}')
-  plt.plot(pcs[:, 1])
+  plt.plot(pcs[:, 0])
   plt.show()
 
 
