@@ -1,4 +1,5 @@
 #%%
+from sklearn.preprocessing import StandardScaler
 import math
 import sys
 import json
@@ -6,7 +7,8 @@ import argparse
 import pandas as pd
 import numpy as np
 import scipy.signal as signal
-from sklearn import decomposition, preprocessing
+from sklearn import preprocessing
+from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from numba import jit
@@ -62,40 +64,53 @@ def load_array(PATH=PATH):
   return array_csi
 
 
-#%%
-PATH = '/mnt/d/wifiDataset/exp1/idle1.csv'
-#plot_rssi(PATH)
-data = abs(load_array(PATH))
-print(data.shape)
-plt.plot(data[:,6])
-plt.show()
-#%%
-PATH = '/mnt/d/wifiDataset/exp1/idle2.csv'
-#plot_rssi(PATH)
-data = abs(load_array(PATH))
-print(data.shape)
-plt.plot(data[:, 6])
-plt.show()
+def running_mean(x, N):
+    cumsum = np.cumsum(x, axis=1)
+    tmp = np.zeros(shape=cumsum.shape)
+    for i in range(len(x)):
+      tmp[i] = tmp[i] + (cumsum[i] - cumsum[max(i-N, 0)])/ float(N)
+      
+      tmp[i] = tmp[i] + (cumsum[min(i+N, len(x)-1)] - cumsum[i]) / float(N)
+    return tmp
 
-
-
-#%%
-PATH = '/mnt/d/wifiDataset/exp1/walk1.csv'
-#plot_rssi(PATH)
-data = abs(load_array(PATH))
-print(data.shape)
-plt.plot(data[:, 6])
-plt.show()
+def remove_offset(x, w = 200):
+  cumsum = np.cumsum(x, axis=1)
+  for i in range(0, len(x)-1, w):
+    #print(i)
+    start = i
+    end = min(i + w, len(x)-1)
+    offset = (cumsum[end] - cumsum[start])/float(end - start)
+    x[start:end] = x[start:end] - offset
+  return x
 
 #%%
 PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
 #plot_rssi(PATH)
 data = abs(load_array(PATH))
-print(data.shape)
-plt.plot(data[:, 6])
+plt.plot(data[:, 6][:500])
+plt.title('Without SMA')
+plt.show()
+data = remove_offset(data, 200)
+plt.plot(data[:,6][:500])
+plt.title('With SMA')
+#plt.ylim(-0.5, 0.5)
 plt.show()
 
+#%%
+data = StandardScaler().fit_transform(data)
+chunked_data = np.array_split(data, 12)
+for i, xx in enumerate(chunked_data):
+  plt.title(f'chunk {i+1}')
+  plt.plot(xx[:,6])
+  plt.show()
 
+#%%
+pca = PCA(n_components=5)
+for i, xx in enumerate(chunked_data):
+  pcs = pca.fit_transform(xx)
+  plt.title(f'PCs {i+1}')
+  plt.plot(pcs[:, 1])
+  plt.show()
 
 
 # %%
@@ -150,7 +165,6 @@ fig.show()
 fig = px.line(df_csi_phase, y=[
               f'sub{i}' for i in LLTF], title='t16 CSI phase LLTF')
 fig.show()
-
 
 # %%
 fig = px.line(df_csi_phase, y=[
