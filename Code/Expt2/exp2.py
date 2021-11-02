@@ -15,7 +15,7 @@ from numba import jit
 import plotly.express as px
 
 # %%
-PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/room2/v2/t16.csv'
+PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
 # %%
 def plot_rssi(PATH=PATH):
   df = pd.read_csv(
@@ -74,12 +74,13 @@ def running_mean(x, N):
     return tmp
 
 def remove_offset(x, w = 200):
-  cumsum = np.cumsum(x, axis=1)
+  #cumsum = np.cumsum(x, axis=1)
   for i in range(0, len(x)-1, w):
     #print(i)
     start = i
     end = min(i + w, len(x)-1)
-    offset = (cumsum[end] - cumsum[start])/float(end - start)
+    #offset = (cumsum[end] - cumsum[start])/float(end - start)
+    offset = np.mean(x[start:end])
     x[start:end] = x[start:end] - offset
   return x
 
@@ -87,11 +88,11 @@ def remove_offset(x, w = 200):
 PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
 #plot_rssi(PATH)
 data = abs(load_array(PATH))
-plt.plot(data[:, 6][:500])
+plt.plot(data[:, 6][:1200])
 plt.title('Without SMA')
 plt.show()
-data = remove_offset(data, 200)
-plt.plot(data[:,6][:500])
+data = remove_offset(data, 300)
+plt.plot(data[:,6][:1200])
 plt.title('With SMA')
 #plt.ylim(-0.5, 0.5)
 plt.show()
