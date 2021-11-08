@@ -167,11 +167,27 @@ for i in range(steps):
     labels.append(1)
 
 #%%
-with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1.hdf5', 'w') as hf:
-    X = hf.create_dataset('X', data=dataset, compression='gzip', chunks=True)
-    Y = hf.create_dataset('Y', data=dataset, compression='gzip', chunks=True)
+dataset = np.array(dataset)
+labels = np.array(labels)
+labels = labels.reshape(-1, 1)
+#%%
 
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1.hdf5', 'w') as hf:
+    X = hf.create_dataset('X', data=dataset)
+    Y = hf.create_dataset('Y', data=labels)
+
+hf.close()
 # %%
+
+X_train = []
+y_train = []
+
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1.hdf5', 'r') as hf:
+    X = hf.get('X')
+    X_train = np.array(X)
+    Y = hf.get('Y')
+    y_train = np.array(Y)
+hf.close()
 
 #%%  
 chunked_data = np.array_split(data, 12)
