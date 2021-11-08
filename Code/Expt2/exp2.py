@@ -135,8 +135,12 @@ BS = 250
 dataset = []
 labels = []
 
+
+dataset2 = []
+labels2 = []
+
 # %%
-PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
+PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp01/room1/still2.csv'
 # plot_rssi(PATH)
 data = abs(load_array(PATH))
 plt.plot(data[:, 6][:1200])
@@ -161,32 +165,36 @@ data = StandardScaler().fit_transform(data)
 
 steps = data.shape[0]//BS
 
-for i in range(steps):
+for i in range(steps-1):
     batch = data[i*BS: min((i+1)*BS, data.shape[0]),:]
-    dataset.append(batch)
-    labels.append(1)
+    dataset2.append(batch)
+    labels2.append(0)
 
 #%%
-dataset = np.array(dataset)
-labels = np.array(labels)
-labels = labels.reshape(-1, 1)
+dataset2 = np.array(dataset2)
+labels2 = np.array(labels2)
+labels2 = labels2.reshape(-1, 1)
+#%%
+dataset3 = np.concatenate((dataset2, dataset), axis=0)
+
+
 #%%
 
-with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1.hdf5', 'w') as hf:
-    X = hf.create_dataset('X', data=dataset)
-    Y = hf.create_dataset('Y', data=labels)
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1_final.hdf5', 'w') as hf:
+    X = hf.create_dataset('X', data=dataset3)
+    Y = hf.create_dataset('Y', data=labels3)
 
 hf.close()
 # %%
 
-X_train = []
-y_train = []
+X_train2 = []
+y_train2 = []
 
-with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1.hdf5', 'r') as hf:
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1_final.hdf5', 'r') as hf:
     X = hf.get('X')
-    X_train = np.array(X)
+    X_train2 = np.array(X)
     Y = hf.get('Y')
-    y_train = np.array(Y)
+    y_train2 = np.array(Y)
 hf.close()
 
 #%%  
