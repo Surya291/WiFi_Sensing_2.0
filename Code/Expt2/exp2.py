@@ -1,4 +1,4 @@
-#%%
+# %%
 from sklearn.preprocessing import StandardScaler
 import math
 import sys
@@ -13,105 +13,156 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from numba import jit
 import plotly.express as px
+from hampel import hampel
 
 # %%
 PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
 # %%
+
+
 def plot_rssi(PATH=PATH):
-  df = pd.read_csv(
-      PATH)
-  df_rssi = df.loc[:, ['rssi']]
-  df_time = df.loc[:, ['real_timestamp']]
-  #print(df_rssi)
-  #print(df_time)
-  df_rssi.plot(y=['rssi'])
-  plt.axis([0, len(df_rssi.index), -72, -45])
-  #plt.plot(df_time['real_timestamp'], df_rssi['rssi'])
-  plt.ylabel('rssi magnitude')
+    df = pd.read_csv(
+        PATH)
+    df_rssi = df.loc[:, ['rssi']]
+    df_time = df.loc[:, ['real_timestamp']]
+    # print(df_rssi)
+    # print(df_time)
+    df_rssi.plot(y=['rssi'])
+    plt.axis([0, len(df_rssi.index), -72, -45])
+    #plt.plot(df_time['real_timestamp'], df_rssi['rssi'])
+    plt.ylabel('rssi magnitude')
+
 
 def load_array(PATH=PATH):
-  df = pd.read_csv(
-      PATH)
-  df_csi = df.loc[:, ['len', 'CSI_DATA']]
-  drop_idx = []
-  for i in range(df_csi.shape[0]):
-    if df_csi.iloc[i]['len'] < 384:
-      drop_idx.append(i)
+    df = pd.read_csv(
+        PATH)
+    df_csi = df.loc[:, ['len', 'CSI_DATA']]
+    drop_idx = []
+    for i in range(df_csi.shape[0]):
+        if df_csi.iloc[i]['len'] < 384:
+            drop_idx.append(i)
 
-  df_csi = df_csi.drop(drop_idx)
-  size_x = len(df_csi.index)
-  size_y = df_csi.iloc[0]['len']//2  # no. of subcarriers ..
+    df_csi = df_csi.drop(drop_idx)
+    size_x = len(df_csi.index)
+    size_y = df_csi.iloc[0]['len']//2  # no. of subcarriers ..
 
-  array_csi = np.zeros([size_x, size_y], dtype=np.complex64)
+    array_csi = np.zeros([size_x, size_y], dtype=np.complex64)
 
-  for x, csi in enumerate(df_csi.iloc):
-      temp = csi["CSI_DATA"].replace(' ', ',')
-      temp = temp.replace(',]', ']')
-      #print(temp)
-      ll = 0
-      if temp[-1] != ']':
-        temp = temp + ']'
-        ll = -1
-      temp = temp.replace(',]', ']')
-      temp = temp.replace('-]', ']')
-      #print((temp))
-      temp = temp.replace(',]', ']')
-      csi_raw_data = json.loads(temp)
-      ll += len(csi_raw_data)
-      for y in range(0, ll, 2):
-          # IQ channel frequency response
-          array_csi[x][y//2] = complex(csi_raw_data[y], csi_raw_data[y + 1])
-  return array_csi
+    for x, csi in enumerate(df_csi.iloc):
+        temp = csi["CSI_DATA"].replace(' ', ',')
+        temp = temp.replace(',]', ']')
+        # print(temp)
+        ll = 0
+        if temp[-1] != ']':
+            temp = temp + ']'
+            ll = -1
+        temp = temp.replace(',]', ']')
+        temp = temp.replace('-]', ']')
+        # print((temp))
+        temp = temp.replace(',]', ']')
+        csi_raw_data = json.loads(temp)
+        ll += len(csi_raw_data)
+        for y in range(0, ll, 2):
+            # IQ channel frequency response
+            array_csi[x][y//2] = complex(csi_raw_data[y], csi_raw_data[y + 1])
+    return array_csi
 
 
 def running_mean(x, N):
     cumsum = np.cumsum(x, axis=1)
     tmp = np.zeros(shape=cumsum.shape)
     for i in range(len(x)):
-      tmp[i] = tmp[i] + (cumsum[i] - cumsum[max(i-N, 0)])/ float(N)
-      
-      tmp[i] = tmp[i] + (cumsum[min(i+N, len(x)-1)] - cumsum[i]) / float(N)
+        tmp[i] = tmp[i] + (cumsum[i] - cumsum[max(i-N, 0)]) / float(N)
+
+        tmp[i] = tmp[i] + (cumsum[min(i+N, len(x)-1)] - cumsum[i]) / float(N)
     return tmp
 
-def remove_offset(x, w = 200):
-  #cumsum = np.cumsum(x, axis=1)
-  for i in range(0, len(x)-1, w):
-    #print(i)
-    start = i
-    end = min(i + w, len(x)-1)
-    #offset = (cumsum[end] - cumsum[start])/float(end - start)
-    offset = np.mean(x[start:end])
-    x[start:end] = x[start:end] - offset
-  return x
 
-#%%
-PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
-#plot_rssi(PATH)
+def remove_offset(x, w=200):
+    #cumsum = np.cumsum(x, axis=1)
+    for i in range(0, len(x)-1, w):
+        # print(i)
+        start = i
+        end = min(i + w, len(x)-1)
+        #offset = (cumsum[end] - cumsum[start])/float(end - start)
+        offset = np.mean(x[start:end])
+        x[start:end] = x[start:end] - offset
+    return x
+
+
+def hampel_smooth(time_series, axis=1):
+    ham_series = time_series.copy()
+    for sc in range(time_series.shape[axis]):
+        # print(sc)
+        sc_ts = pd.Series(time_series[:, sc])
+        # print(sc_ts.shape)
+        ham_series[:, sc] = hampel(sc_ts, window_size=20, n=3, imputation=True)
+
+    return ham_series
+
+
+def hampel_smooth2(vals_orig, k=7, t0=3):
+    '''
+    vals: pandas series of values from which to remove outliers
+    k: size of window (including the sample; 7 is equal to 3 on either side of value)
+    '''
+
+    #Make copy so original not edited
+    vals = vals_orig.copy()
+    vals = pd.DataFrame(vals)
+    #Hampel Filter
+    L = 1.4826
+    rolling_median = vals.rolling(window=k, center=True, axis = 0).median()
+    def MAD(x): return np.median(np.abs(x - np.median(x, axis=0)))
+    rolling_MAD = vals.rolling(window=k, center=True, axis=0).apply(MAD)
+    threshold = t0 * L * rolling_MAD
+    difference = np.abs(vals - rolling_median)
+
+    '''
+    Perhaps a condition should be added here in the case that the threshold value
+    is 0.0; maybe do not mark as outlier. MAD may be 0.0 without the original values
+    being equal. See differences between MAD vs SDV.
+    '''
+
+    outlier_idx = difference > threshold
+    vals[outlier_idx] = rolling_median[outlier_idx]
+    return(vals)
+
+
+# %%
+PATH = '/mnt/d/wifiDataset/exp1/idle2.csv'
+# plot_rssi(PATH)
 data = abs(load_array(PATH))
 plt.plot(data[:, 6][:1200])
 plt.title('Without SMA')
 plt.show()
+
+data = hampel_smooth(data)
+plt.plot(data[:, 6][:1200])
+plt.title('With Hampel')
+plt.show()
+
 data = remove_offset(data, 300)
-plt.plot(data[:,6][:1200])
-plt.title('With SMA')
+plt.plot(data[:, 6][:1200])
+plt.title('With hampel and offset')
 #plt.ylim(-0.5, 0.5)
 plt.show()
 
-#%%
+# %%
 data = StandardScaler().fit_transform(data)
 chunked_data = np.array_split(data, 12)
 for i, xx in enumerate(chunked_data):
-  plt.title(f'chunk {i+1}')
-  plt.plot(xx[:,6])
-  plt.show()
+    plt.title(f'chunk {i+1}')
+    plt.plot(xx[:, 6])
+    plt.show()
 
-#%%
+# %%
 pca = PCA(n_components=5)
 for i, xx in enumerate(chunked_data):
-  pcs = pca.fit_transform(xx)
-  plt.title(f'PCs {i+1}')
-  plt.plot(pcs[:, 0])
-  plt.show()
+    pcs = pca.fit_transform(xx)
+    plt.title(f'PCs {i+1}')
+    plt.plot(pcs[:, 1])
+    plt.show()
 
 
 # %%
@@ -123,29 +174,29 @@ array_csi_phase = np.angle(array_csi)
 drop_idx = []
 
 for i in range(array_csi_modulus.shape[1]):
-  if (np.var(array_csi_modulus[:, i]) < 1):
-    drop_idx.append(i)
+    if (np.var(array_csi_modulus[:, i]) < 1):
+        drop_idx.append(i)
 
 
 print(len(drop_idx))
 
 for i in (drop_idx):
-  plt.plot(array_csi_modulus[:, i])
+    plt.plot(array_csi_modulus[:, i])
 
 # %%
 select_list = [i for i in range(192)]
 
 
 for i in drop_idx:
-  select_list.remove(i)
+    select_list.remove(i)
 
 LLTF = []
 HTLTF = []
 for i in select_list:
-  if i < 64:
-    LLTF.append(i)
-  elif 64 <= i < 128:
-    HTLTF.append(i)
+    if i < 64:
+        LLTF.append(i)
+    elif 64 <= i < 128:
+        HTLTF.append(i)
 
 # %%
 columns = [f'sub{i}' for i in range(0, size_y)]
@@ -157,7 +208,7 @@ fig = px.line(df_csi_modulus, y=[
               f'sub{i}' for i in LLTF], title='t16 CSI magnitude LLTF')
 fig.show()
 
-#%%
+# %%
 fig = px.line(df_csi_modulus, y=[
               f'sub{i}' for i in HTLTF], title='t16 CSI magnitude HTLTF')
 fig.show()
