@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from numba import jit
 import plotly.express as px
 from hampel import hampel
+import h5py
 
 # %%
 PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
@@ -129,8 +130,13 @@ def hampel_smooth2(vals_orig, k=7, t0=3):
     return(vals)
 
 
+#%%
+BS = 250
+dataset = []
+labels = []
+
 # %%
-PATH = '/mnt/d/wifiDataset/exp1/idle2.csv'
+PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
 # plot_rssi(PATH)
 data = abs(load_array(PATH))
 plt.plot(data[:, 6][:1200])
@@ -149,7 +155,25 @@ plt.title('With hampel and offset')
 plt.show()
 
 # %%
+#create dataset
+
 data = StandardScaler().fit_transform(data)
+
+steps = data.shape[0]//BS
+
+for i in range(steps):
+    batch = data[i*BS: min((i+1)*BS, data.shape[0]),:]
+    dataset.append(batch)
+    labels.append(1)
+
+#%%
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1.hdf5', 'w') as hf:
+    X = hf.create_dataset('X', data=dataset, compression='gzip', chunks=True)
+    Y = hf.create_dataset('Y', data=dataset, compression='gzip', chunks=True)
+
+# %%
+
+#%%  
 chunked_data = np.array_split(data, 12)
 for i, xx in enumerate(chunked_data):
     plt.title(f'chunk {i+1}')
