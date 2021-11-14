@@ -1,4 +1,8 @@
 #%%
+from keras.layers import Activation, Dropout, Flatten, Dense  # %%
+from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.layers import Conv2D, MaxPooling2D
+from keras.models import Sequential
 import h5py
 import numpy as np
 from numpy.core.fromnumeric import shape
@@ -9,6 +13,8 @@ from sklearn import metrics
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
+
+
 
 #%%
 data = []
@@ -53,7 +59,6 @@ X_train, X_test, y_train, y_test = train_test_split(
     new_data, labels, test_size=0.20, random_state=42)
 
 # %%
-
 
 
 
