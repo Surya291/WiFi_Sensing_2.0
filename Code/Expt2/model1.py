@@ -1,6 +1,7 @@
 #%%
 import h5py
 import numpy as np
+from numpy.core.fromnumeric import shape
 from sklearn import svm
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -24,24 +25,32 @@ hf.close()
 data = data[:, :, :64]
 print(data.shape)
 N = data.shape[0]
+
+#%%
+n_comps = 5
+pca = PCA(n_components=n_comps)
+new_data = np.empty(shape=(data.shape[0], data.shape[1], n_comps))
+for i in range(data.shape[0]):
+    pcs = pca.fit_transform(data[i])
+    new_data[i] = pcs
+
+print(data.shape)
+
 #%%
 
 def plot_chunk(x, y):
-    plt.plot(x[:, 6])
+    plt.plot(x[:, 2])
     plt.title('Labelled as ' + str(y))
     plt.show()
 
 
 #%%
-plot_chunk(data[2], labels[2])
+plot_chunk(new_data[2], labels[2])
 
-pca = PCA(n_components=5)
-pcs = pca.fit_transform(data)
-print(data.shape)
 
 #%%
 X_train, X_test, y_train, y_test = train_test_split(
-    data, labels, test_size=0.20, random_state=42)
+    new_data, labels, test_size=0.20, random_state=42)
 
 # %%
 
