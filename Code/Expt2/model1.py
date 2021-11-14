@@ -41,6 +41,12 @@ for i in range(data.shape[0]):
     new_data[i] = pcs
 
 print(data.shape)
+#%%
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset2.hdf5', 'w') as hf:
+    X = hf.create_dataset('X', data=new_data)
+    Y = hf.create_dataset('Y', data=labels)
+
+hf.close()
 
 #%%
 
