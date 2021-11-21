@@ -17,7 +17,7 @@ from hampel import hampel
 import h5py
 
 # %%
-PATH = '/mnt/d/wifiDataset/exp1/walk2.csv'
+PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp04/wave1.csv'
 # %%
 
 
@@ -140,7 +140,7 @@ dataset2 = []
 labels2 = []
 
 # %%
-PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp01/room1/still2.csv'
+PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp04/wave1.csv'
 # plot_rssi(PATH)
 data = abs(load_array(PATH))
 plt.plot(data[:, 6][:1200])
@@ -167,22 +167,22 @@ steps = data.shape[0]//BS
 
 for i in range(steps-1):
     batch = data[i*BS: min((i+1)*BS, data.shape[0]),:]
-    dataset2.append(batch)
-    labels2.append(0)
+    dataset.append(batch)
+    labels.append(2)
 
 #%%
-dataset2 = np.array(dataset2)
-labels2 = np.array(labels2)
-labels2 = labels2.reshape(-1, 1)
+dataset = np.array(dataset)
+labels = np.array(labels)
+labels = labels.reshape(-1, 1)
 #%%
 dataset3 = np.concatenate((dataset2, dataset), axis=0)
 
 
 #%%
 
-with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1_final.hdf5', 'w') as hf:
-    X = hf.create_dataset('X', data=dataset3)
-    Y = hf.create_dataset('Y', data=labels3)
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset2_final.hdf5', 'w') as hf:
+    X = hf.create_dataset('X', data=dataset)
+    Y = hf.create_dataset('Y', data=labels)
 
 hf.close()
 # %%
