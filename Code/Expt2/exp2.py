@@ -140,7 +140,7 @@ dataset2 = []
 labels2 = []
 
 # %%
-PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp04/wave1.csv'
+PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp03/room2/wave2.csv'
 # plot_rssi(PATH)
 data = abs(load_array(PATH))
 plt.plot(data[:, 6][:1200])
@@ -190,7 +190,7 @@ hf.close()
 X_train2 = []
 y_train2 = []
 
-with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1_final.hdf5', 'r') as hf:
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset2_final.hdf5', 'r') as hf:
     X = hf.get('X')
     X_train2 = np.array(X)
     Y = hf.get('Y')
