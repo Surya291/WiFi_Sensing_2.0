@@ -272,3 +272,12 @@ fig = px.line(df_csi_phase, y=[
 fig.show()
 
 # %%
+for i in range(1, 21):
+    PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp02/room1/phone' + str(i) + '.csv'
+    data = abs(load_array(PATH))
+    print(data.shape)
+    # plt.plot(data[:, 6])
+    # plt.title('sample f{i}')
+    # plt.show()
+
+# %%
