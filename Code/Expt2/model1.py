@@ -14,6 +14,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
 import pywt
+import scaleogram as scg
 
 
 #%%
@@ -57,7 +58,7 @@ def plot_chunk(x, y):
 
 
 #%%
-plot_chunk(new_data[2], labels[2])
+plot_chunk(new_data[1], labels[1])
 
 
 #%%
@@ -65,11 +66,13 @@ X_train, X_test, y_train, y_test = train_test_split(
     new_data, labels, test_size=0.20, random_state=42)
 
 # %%
-wave1 = new_data[1, :, 1]
-
+wave1 = new_data[38, :, 1]
+plot_chunk(wave1, 2)
 #%%
-walk1 = new_data[1, :, 1]
+walk1 = new_data[2, :, 1]
+plot_chunk(walk1, 1)
 still1 = new_data[56, :, 1]
+plot_chunk(still1, 0)
 # %%
 scales = np.arange(1, 128)
 [coeff, freq] = pywt.cwt(new_data[20, :, 1], scales=scales, wavelet='mexh')
@@ -78,5 +81,18 @@ scales = np.arange(1, 128)
 #%%
 plt.imshow(coeff, extent=[-1, 1, 1, 31], cmap='PRGn', aspect='auto',
            vmax=abs(coeff).max(), vmin=-abs(coeff).max())
+
+# %%
+scg.set_default_wavelet('morl')
+signal_length = 250
+scales = scg.periods2scales(np.arange(1, signal_length+1))
+x_values_wvt_arr = range(0, len(walk1), 1)
+
+#%%
+scg.cws(wave1, scales=scales, figsize=(10, 4.0), coi=False, ylabel="Period", xlabel="Time",
+        title='cwt plot')
+
+# %%
+scg.plot_wavelets(figsize=(15, 15))
 
 # %%
