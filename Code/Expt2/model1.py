@@ -21,7 +21,7 @@ import scaleogram as scg
 data = []
 labels = []
 
-with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset1_final.hdf5', 'r') as hf:
+with h5py.File('/Users/aayush/Aayush/WiFi_Sensing_2.0/dataset/dataset1_final.hdf5', 'r') as hf:
     X = hf.get('X')
     data = np.array(X)
     Y = hf.get('Y')
@@ -43,7 +43,7 @@ for i in range(data.shape[0]):
 
 print(new_data.shape)
 #%%
-with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset2.hdf5', 'w') as hf:
+with h5py.File('/Users/aayush/Aayush/WiFi_Sensing_2.0/dataset/dataset2.hdf5', 'w') as hf:
     X = hf.create_dataset('X', data=new_data)
     Y = hf.create_dataset('Y', data=labels)
 
