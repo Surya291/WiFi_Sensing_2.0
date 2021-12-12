@@ -11,13 +11,12 @@ from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-from numba import jit
 import plotly.express as px
 from hampel import hampel
 import h5py
 
 # %%
-PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp04/wave1.csv'
+PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp04/page/page1.csv'
 # %%
 
 
@@ -140,9 +139,9 @@ dataset2 = []
 labels2 = []
 
 # %%
-PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp03/room2/wave2.csv'
+#PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp04/page/page2.csv'
 # plot_rssi(PATH)
-data = abs(load_array(PATH))
+#data = abs(load_array(PATH))
 plt.plot(data[:, 6][:1200])
 plt.title('Without SMA')
 plt.show()
@@ -157,6 +156,21 @@ plt.plot(data[:, 6][:1200])
 plt.title('With hampel and offset')
 #plt.ylim(-0.5, 0.5)
 plt.show()
+#%%
+PATH = '/home/kuntal990/projects/WiFi_Sensing_2.0/ml/exp04/phone'
+data = abs(load_array(PATH + '/phone' +str(1) + '.csv'))[:250]
+
+for i in range(2, 31):
+    tmp = abs(load_array(PATH + '/phone' +str(i) + '.csv'))
+    if len(tmp) < 250:
+        continue
+    data = np.concatenate((data, tmp[:250]), axis = 0)
+    print(len(data))
+    # plt.plot(data[:, 6][:1200])
+    # plt.title('Without SMA')
+    # plt.show()
+
+
 
 # %%
 #create dataset
@@ -168,7 +182,7 @@ steps = data.shape[0]//BS
 for i in range(steps-1):
     batch = data[i*BS: min((i+1)*BS, data.shape[0]),:]
     dataset.append(batch)
-    labels.append(2)
+    labels.append(4)
 
 #%%
 dataset = np.array(dataset)
@@ -180,7 +194,7 @@ dataset3 = np.concatenate((dataset2, dataset), axis=0)
 
 #%%
 
-with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset2_final.hdf5', 'w') as hf:
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset4_final.hdf5', 'w') as hf:
     X = hf.create_dataset('X', data=dataset)
     Y = hf.create_dataset('Y', data=labels)
 
@@ -280,4 +294,24 @@ for i in range(1, 21):
     # plt.title('sample f{i}')
     # plt.show()
 
+# %%
+X_f = []
+y_f = []
+
+#%%
+X_train2 = []
+y_train2 = []
+
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset4_final.hdf5', 'r') as hf:
+    X = hf.get('X')
+    X_train2 = np.array(X)
+    Y = hf.get('Y')
+    y_train2 = np.array(Y)
+hf.close()
+# %%
+with h5py.File('/home/kuntal990/projects/WiFi_Sensing_2.0/dataset/dataset_FINAL5.hdf5', 'w') as hf:
+    X = hf.create_dataset('X', data=X_f)
+    Y = hf.create_dataset('Y', data=y_f)
+
+hf.close()
 # %%
