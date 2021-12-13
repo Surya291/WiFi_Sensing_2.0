@@ -66,13 +66,13 @@ X_train, X_test, y_train, y_test = train_test_split(
     new_data, labels, test_size=0.20, random_state=42)
 
 # %%
-wave1 = new_data[38, :, 1]
+wave1 = new_data[12, :, 1]
 plot_chunk(wave1, 2)
 #%%
 walk1 = new_data[2, :, 1]
-plot_chunk(walk1, 1)
+#plot_chunk(walk1, 1)
 still1 = new_data[56, :, 1]
-plot_chunk(still1, 0)
+#plot_chunk(still1, 0)
 # %%
 scales = np.arange(1, 128)
 [coeff, freq] = pywt.cwt(new_data[20, :, 1], scales=scales, wavelet='mexh')
