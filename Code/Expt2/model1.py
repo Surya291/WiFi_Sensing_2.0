@@ -54,8 +54,6 @@ def plot_chunk(x, y):
     plt.title('Labelled as ' + str(y))
     plt.show()
 
-
-#%%
 plot_chunk(new_data[1], labels[1])
 
 
@@ -134,7 +132,7 @@ def build_cnn_model(activation, input_shape):
     print(model.summary())
     return model
 
-def compile_and_fit_model(model, X_train, y_train, X_test, y_test, batch_size, n_epochs):
+def compile_and_fit_model(model, X_train, y_train, X_test, y_test, batch_size, n_epochs,filepath):
 
     # compile the model
     model.compile(
@@ -143,8 +141,8 @@ def compile_and_fit_model(model, X_train, y_train, X_test, y_test, batch_size, n
         metrics=['sparse_categorical_accuracy'])
     
     # define callbacks
-    callbacks = [ModelCheckpoint(filepath='best-model.epoch{epoch:02d}.hdf5', \
-        monitor='val_sparse_categorical_accuracy', save_best_only=True, verbose=1, mode='min')]
+    callbacks = [ModelCheckpoint(filepath=filepath, \
+        monitor='val_sparse_categorical_accuracy', save_best_only=True, verbose=1)]
     
     # fit the model
     history = model.fit(x=X_train,
@@ -159,15 +157,15 @@ def compile_and_fit_model(model, X_train, y_train, X_test, y_test, batch_size, n
 
 #%%
 input_shape = (X_train.shape[1], X_train.shape[2], X_train.shape[3])
-
+FILEPATH = './checkpoints/best-model-ogcnn.hdf5'
 cnn_model = build_cnn_model("relu", input_shape)
 
 #%%
-trained_cnn_model, cnn_history = compile_and_fit_model(cnn_model, X_train, y_train, X_test, y_test, 1, 100)
+trained_cnn_model, cnn_history = compile_and_fit_model(cnn_model, X_train, y_train, X_test, y_test, 1, 100, FILEPATH)
 
 # %%
 # cnn_eval = build_cnn_model("relu", input_shape)
-cnn_eval = load_model('/home/kuntal990/projects/WiFi_Sensing_2.0/Code/Expt2/checkpoints/best_model.tf')
+cnn_eval = load_model(FILEPATH)
 #cnn_eval.load_weights('./checkpoints/best_model.tf')
 # cnn_eval.load_weights('/home/kuntal990/projects/WiFi_Sensing_2.0/Code/Expt2/checkpoints/best_model.tf/saved_model.pb')
 loss, acc = cnn_eval.evaluate(X_test, y_test, verbose=2)
