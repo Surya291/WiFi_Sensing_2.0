@@ -60,19 +60,7 @@ plot_chunk(new_data[1], labels[1])
 
 
 # %%
-<<<<<<< HEAD
 scales = np.arange(1, 65)
-=======
-wave1 = new_data[12, :, 1]
-plot_chunk(wave1, 2)
-#%%
-walk1 = new_data[2, :, 1]
-#plot_chunk(walk1, 1)
-still1 = new_data[56, :, 1]
-#plot_chunk(still1, 0)
-# %%
-scales = np.arange(1, 128)
->>>>>>> 1512fd97aa488237f4ceab949e9525395d1e575e
 [coeff, freq] = pywt.cwt(new_data[20, :, 1], scales=scales, wavelet='mexh')
 
 
@@ -112,7 +100,7 @@ for i in range(len(new_data)):
 
 #%%
 X_train, X_test, y_train, y_test = train_test_split(
-    X_cwt, labels, test_size=0.40, random_state=42, stratify=labels)
+    X_cwt, labels, test_size=0.4, random_state=42, stratify=labels)
 
 print(f"shapes (n_samples, x_img, y_img, z_img) of X_train_cwt: {X_train.shape}")
 #%%
@@ -121,10 +109,10 @@ print(f"TensorFlow version: {tf.__version__}")
 #import keras (high level API) wiht tensorflow as backend
 sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(log_device_placement=True))
 #%%
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import Dense, Activation, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 #%%
 def build_cnn_model(activation, input_shape):
@@ -155,7 +143,8 @@ def compile_and_fit_model(model, X_train, y_train, X_test, y_test, batch_size, n
         metrics=['sparse_categorical_accuracy'])
     
     # define callbacks
-    callbacks = [ModelCheckpoint(filepath='./checkpoints/best_model.tf', save_format='tf', monitor='val_sparse_categorical_accuracy', save_best_only=True)]
+    callbacks = [ModelCheckpoint(filepath='best-model.epoch{epoch:02d}.hdf5', \
+        monitor='val_sparse_categorical_accuracy', save_best_only=True, verbose=1, mode='min')]
     
     # fit the model
     history = model.fit(x=X_train,
@@ -177,9 +166,10 @@ cnn_model = build_cnn_model("relu", input_shape)
 trained_cnn_model, cnn_history = compile_and_fit_model(cnn_model, X_train, y_train, X_test, y_test, 1, 100)
 
 # %%
-cnn_eval = build_cnn_model("relu", input_shape)
+# cnn_eval = build_cnn_model("relu", input_shape)
+cnn_eval = load_model('/home/kuntal990/projects/WiFi_Sensing_2.0/Code/Expt2/checkpoints/best_model.tf')
 #cnn_eval.load_weights('./checkpoints/best_model.tf')
-cnn_eval.load_weights('/home/kuntal990/projects/WiFi_Sensing_2.0/Code/Expt2/checkpoints/best_model.tf/saved_model.pb')
+# cnn_eval.load_weights('/home/kuntal990/projects/WiFi_Sensing_2.0/Code/Expt2/checkpoints/best_model.tf/saved_model.pb')
 loss, acc = cnn_eval.evaluate(X_test, y_test, verbose=2)
 #%%
 import seaborn as sns
@@ -219,7 +209,7 @@ def create_confusion_matrix(y_pred, y_test):
     plt.show()
 
 # make predictions for test data
-y_pred = trained_cnn_model.predict_classes(X_test)
+y_pred = cnn_eval.predict_classes(X_test)
 # determine the total accuracy 
 accuracy = metrics.accuracy_score(y_test, y_pred)
 print("Accuracy: %.2f%%" % (accuracy * 100.0))
