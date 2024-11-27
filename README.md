@@ -1,5 +1,5 @@
 # WiFi_Sensing_2.0
-Detect malpractices conducted during the online examination using wifi sensing. 
+Detect motions of a user in the environment using wifi sensing. 
 
 # Hardware setup
 
